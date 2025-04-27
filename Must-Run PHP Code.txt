@@ -1,1 +1,2 @@
-ALTER TABLE your_table_name ADD COLUMN file_path VARCHAR(255);
+ALTER TABLE messages ADD COLUMN file_path VARCHAR(255);
+ALTER TABLE messages MODIFY message TEXT DEFAULT NULL;

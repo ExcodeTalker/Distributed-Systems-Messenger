@@ -13,18 +13,22 @@ class Message {
 
     public function sendMessage() {
 		
-		// Assisted by GitHub Copilot (2025) Encryption & Decryption Available at: https://github.com/copilot/c/83d4f84d-23a7-4593-		b1f2-25407f05ab10 
+		// Assisted by GitHub Copilot (2025) Encryption & Decryption Available at: https://github.com/copilot/c/83d4f84d-23a7-4593-b1f2-25407f05ab10 
 		// Assisted by GitHub Copilot (2025) File Handling Available at: https://github.com/copilot/c/b5727aa1-a67d-4fb1-b604-81b5ec3605d5
-        $query = "INSERT INTO " . $this->table_name . " 
-                  SET user_from=:user_from, user_to=:user_to, message=:message, file_path=:file_path, date_sent=NOW()";
-        $stmt = $this->conn->prepare($query);
+		
+    $query = "INSERT INTO " . $this->table_name . " 
+              SET user_from=:user_from, user_to=:user_to, date_sent=NOW(), 
+              message=:message, file_path=:file_path";
+    $stmt = $this->conn->prepare($query);
 
-        // Sanitize user inputs
-        $this->user_from = htmlspecialchars(strip_tags($this->user_from));
-        $this->user_to = htmlspecialchars(strip_tags($this->user_to));
-        $this->message = htmlspecialchars(strip_tags($this->message));
+    // Sanitize user inputs
+    $this->user_from = htmlspecialchars(strip_tags($this->user_from));
+    $this->user_to = htmlspecialchars(strip_tags($this->user_to));
+    $this->message = !empty($this->message) ? htmlspecialchars(strip_tags($this->message)) : null;
 
-        // Encryption settings
+    // Encryption settings (only if message is not empty)
+    $final_message = null;
+    if (!empty($this->message)) {
         $ciphering = "AES-128-CTR";
         $iv_length = openssl_cipher_iv_length($ciphering);
         $options = 0;
@@ -49,39 +53,40 @@ class Message {
 
         // Append the IV to the encrypted message for decryption later
         $final_message = $encoded_iv . "::" . $encrypted_message;
+    }
 
-        // File handling logic
-        $file_path = null; // Default to null if no file is uploaded
-        if (isset($_FILES["file"]) && $_FILES["file"]["error"] == 0) {
-            $target_dir = "uploads/"; // Directory to store uploaded files
-            $target_file = $target_dir . basename($_FILES["file"]["name"]);
+    // File handling logic
+    $file_path = null; // Default to null if no file is uploaded
+    if (isset($_FILES["file"]) && $_FILES["file"]["error"] == 0) {
+        $target_dir = "uploads/"; // Directory to store uploaded files
+        $target_file = $target_dir . basename($_FILES["file"]["name"]);
 
-            // Validate file type and size (optional but recommended)
-            $allowed_types = ["image/jpeg", "image/png", "application/pdf"];
-            $max_size = 5 * 1024 * 1024; // 5 MB
+        // Validate file type and size (optional but recommended)
+        $allowed_types = ["image/jpeg", "image/png", "application/pdf"];
+        $max_size = 5 * 1024 * 1024; // 5 MB
 
-            if (in_array($_FILES["file"]["type"], $allowed_types) && $_FILES["file"]["size"] <= $max_size) {
-                if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
-                    $file_path = $target_file;
-                } else {
-                    echo "Sorry, there was an error uploading your file.";
-                    return false;
-                }
+        if (in_array($_FILES["file"]["type"], $allowed_types) && $_FILES["file"]["size"] <= $max_size) {
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+                $file_path = $target_file;
             } else {
-                echo "Invalid file type or size.";
+                echo "Sorry, there was an error uploading your file.";
                 return false;
             }
+        } else {
+            echo "Invalid file type or size.";
+            return false;
         }
-
-        // Bind parameters
-        $stmt->bindParam(":user_from", $this->user_from);
-        $stmt->bindParam(":user_to", $this->user_to);
-        $stmt->bindParam(":message", $final_message);
-        $stmt->bindParam(":file_path", $file_path);
-
-        // Execute the query and return the result
-        return $stmt->execute();
     }
+
+    // Bind parameters
+    $stmt->bindParam(":user_from", $this->user_from);
+    $stmt->bindParam(":user_to", $this->user_to);
+    $stmt->bindParam(":message", $final_message); // Can be null if no message
+    $stmt->bindParam(":file_path", $file_path);   // Can be null if no file
+
+    // Execute the query and return the result
+    return $stmt->execute();
+	}
 
     public function getMessagesWithUsernames($user_from, $user_to) {
         $query = "SELECT m.*, u1.user_name AS sender_name, u2.user_name AS receiver_name 
