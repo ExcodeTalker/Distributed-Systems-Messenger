@@ -3,7 +3,7 @@ class Database {
 private $host = "172.16.11.22:3306";
 private $db_name = "fosd1_23_messenger";
 private $username = "fosd1_23_bingus";
-private $password = "AzurL4ne!";
+private $password = "BpeLZujy1xm3*k9?";
 public $conn;
 public function getConnection() {
 $this->conn = null;

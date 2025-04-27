@@ -1,7 +1,7 @@
 <?php
 function decryptMessage($encrypted_message, $encryption_key) {
 	
-	// Assisted by GitHub Copilot (2025) Available at: https://github.com/copilot/c/83d4f84d-23a7-4593-b1f2-25407f05ab10
+	// Assisted by GitHub Copilot (2025) Encryption & Decryption Available at: https://github.com/copilot/c/83d4f84d-23a7-4593-b1f2-25407f05ab10 
 	
     // Split the stored message into IV and encrypted message
     list($encoded_iv, $encrypted_message) = explode("::", $encrypted_message);
