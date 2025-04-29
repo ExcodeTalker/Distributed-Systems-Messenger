@@ -2,8 +2,8 @@
 class Database {
 private $host = "172.16.11.22:3306";
 private $db_name = "fosd1_23_messenger";
-private $username = "fosd1_23_bingus";
-private $password = "BpeLZujy1xm3*k9?";
+private $username = "Redacted";
+private $password = "Redacted";
 public $conn;
 public function getConnection() {
 $this->conn = null;
